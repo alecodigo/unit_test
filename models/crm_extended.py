@@ -42,7 +42,7 @@ class SaleOrderLine(models.Model):
 
 
     parent_id = fields.Many2one('sale.order', string='Parent')
-    child_ids = fields.One2many('sale.order', 'parent_id', string='Children')
+    child = fields.Boolean(string='Child')
 
 
 

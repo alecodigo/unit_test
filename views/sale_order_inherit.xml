@@ -8,11 +8,7 @@
 	    <field name="arch" type="xml">
 		    <xpath expr="//group/group" position="inside">
 			    <field name="parent_id"/>
-		    </xpath>
-		    <xpath expr="//page[2]" position="after">
-			    <page name="order_child" string="Sale Order">
-				    <field name="child_ids"/>
-			    </page>
+			    <field name="child"/>
 		    </xpath>
 	    </field>
 	</record>
