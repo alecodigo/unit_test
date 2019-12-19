@@ -13,6 +13,7 @@
  
     'data': [
         'data/ir_sequence_data.xml',
+        'views/sale_order_inherit.xml',
         ],
     'installable': True,
     'auto_install': False,

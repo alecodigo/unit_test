@@ -38,11 +38,11 @@ class Lead(models.Model):
 
 
 class SaleOrderLine(models.Model):
-    _inherit = 'sale.order.line'
+    _inherit = 'sale.order'
 
 
-    parent = fields.Many2one('sale.order.line', string='Parent')
-    child = fields.Boolean(string='Child')
+    parent_id = fields.Many2one('sale.order', string='Parent')
+    child_ids = fields.One2many('sale.order', 'parent_id', string='Children')
 
 
 
