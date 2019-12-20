@@ -3,7 +3,7 @@
 import logging
 
 from odoo import api, fields, models, _
-from odoo.exceptions import ValidationError
+from odoo.exceptions import ValidationError, UserError
 
 _logger = logging.getLogger(__name__)
 
@@ -46,17 +46,6 @@ class SaleOrder(models.Model):
 
 
 
-    @api.multi
-    @api.constrains('name')
-    def variante(self):
-        self.ensure_one()
-        #if self.name == _('New'):
-        #    raise ValidationError(_('Sorry you need first create this record'))
-        #else:
-        return self.env.ref('crm_sale_order_extended.sale_order_variant').read()[0]
-
-
-
     @api.model
     def create(self, vals):
         if vals.get('name', _('New')) == _('New'):
@@ -76,3 +65,12 @@ class SaleOrder(models.Model):
             
         result = super(SaleOrder, self).create(vals)
         return result
+
+
+
+    @api.multi
+    def variante(self):
+        self.ensure_one()
+        action = self.env.ref('crm_sale_order_extended.sale_order_variant').read()[0]
+
+        return action

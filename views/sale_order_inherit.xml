@@ -14,7 +14,7 @@
 					    </h1>
 				    </div>
 
-                                   <button string="Crear Variante" name="variante" type="object" class="btn-primary"/>
+				    <button string="Crear Variante" name="variante" type="object" class="btn-primary" context="{'default_name': name, 'default_child': True, 'default_origin': origin}" />
 			    </group>
 		    </xpath>
 		    <xpath expr="//group/group" position="inside">
