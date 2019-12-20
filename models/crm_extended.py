@@ -1,8 +1,11 @@
 # -*- coding: utf-8 -*-
 
+import logging
 
 from odoo import api, fields, models, _
+from odoo.exceptions import ValidationError
 
+_logger = logging.getLogger(__name__)
 
 
 class Lead(models.Model):
@@ -34,10 +37,7 @@ class Lead(models.Model):
 
 
 
-
-
-
-class SaleOrderLine(models.Model):
+class SaleOrder(models.Model):
     _inherit = 'sale.order'
 
 
@@ -46,4 +46,33 @@ class SaleOrderLine(models.Model):
 
 
 
+    @api.multi
+    @api.constrains('name')
+    def variante(self):
+        self.ensure_one()
+        #if self.name == _('New'):
+        #    raise ValidationError(_('Sorry you need first create this record'))
+        #else:
+        return self.env.ref('crm_sale_order_extended.sale_order_variant').read()[0]
 
+
+
+    @api.model
+    def create(self, vals):
+        if vals.get('name', _('New')) == _('New'):
+            if 'company_id' in vals:
+                vals['name'] = self.env['ir.sequence'].with_context(force_company=vals['company_id']).next_by_code('sale.order') or _('New')
+            else:
+                vals['name'] = self.env['ir.sequence'].next_by_code('sale.order') or _('New')
+
+        if any(f not in vals for f in ['partner_invoice_id', 'partner_shipping_id', 'pricelist_id']):
+            partner = self.env['res.partner'].browse(vals.get('partner_id'))
+            addr = partner.address_get(['delivery', 'invoice'])
+            vals['partner_invoice_id'] = vals.setdefault('partner_invoice_id', addr['invoice'])
+            
+            vals['partner_shipping_id'] = vals.setdefault('partner_shipping_id', addr['delivery'])
+            
+            vals['pricelist_id'] = vals.setdefault('pricelist_id', partner.property_product_pricelist and partner.property_product_pricelist.id)
+            
+        result = super(SaleOrder, self).create(vals)
+        return result

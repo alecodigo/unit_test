@@ -6,6 +6,17 @@
 	    <field name="model">sale.order</field>
 	    <field name="inherit_id" ref="sale.view_order_form"/>
 	    <field name="arch" type="xml">
+		    <xpath expr="//div[@class='oe_title']" position="replace">
+			    <group col="2">
+				    <div class="oe_title">
+					    <h1>
+						    <field name="name" readonly="1"/>
+					    </h1>
+				    </div>
+
+                                   <button string="Crear Variante" name="variante" type="object" class="btn-primary"/>
+			    </group>
+		    </xpath>
 		    <xpath expr="//group/group" position="inside">
 			    <field name="parent_id"/>
 			    <field name="child"/>
