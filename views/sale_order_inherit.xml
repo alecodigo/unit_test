@@ -14,11 +14,11 @@
 					    </h1>
 				    </div>
 
-				    <button string="Crear Variante" name="variante" type="object" class="btn-primary" context="{'default_name': name, 'default_child': True, 'default_origin': origin}" />
+				    <button string="Crear Variante" name="variante" type="object" class="btn-primary" context="{'default_name': name, 'default_child': True, 'default_origin': origin, 'default_parent_id': active_id}"/>
 			    </group>
 		    </xpath>
 		    <xpath expr="//group/group" position="inside">
-			    <field name="parent_id"/>
+			    <field name="parent_id" attrs="{'required': [('child', '=', True)]}"/>
 			    <field name="child"/>
 		    </xpath>
 	    </field>
