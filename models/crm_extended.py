@@ -37,10 +37,10 @@ class Lead(models.Model):
 
 
 
-class SaleOrder(models.Model):
+class SaleOrderNew(models.Model):
     _inherit = 'sale.order'
 
-
+    #name = fields.Char(string='Order Reference', required=False, copy=False, readonly=True, states={'draft': [('readonly', False)]}, index=True, default=lambda self: _('New'))
     parent_id = fields.Many2one('sale.order', string='Parent')
     child = fields.Boolean(string='Child')
 
@@ -58,25 +58,32 @@ class SaleOrder(models.Model):
                 _logger.info("\n\n\n\n %s \n\n", orders)
 
 
-    @api.onchange('parent_id')
-    def set_child(self):
-        if self.parent_id:
-            self.child = True
-        else:
-            self.child = False
+    @api.multi
+    def variante(self):
+        self.ensure_one()
+        action = self.env.ref('crm_sale_order_extended.sale_order_variant').read()[0]   
+
+        _logger.info("\n\n action: %s \n\n", action)
+        return action
+
+
+    #@api.onchange('parent_id')
+    #def set_child(self):
+    #    if self.parent_id:
+    #        self.child = True
+    #    else:
+    #        self.child = False
 
 
     @api.model
     def create(self, vals):
         _logger.info("\n\n\n vals: %s \n\n\n", vals)
-        if vals.get('child') == True:
+        if vals.get('child') == False:
             if vals.get('name', _('New')) == _('New'):
                 if 'company_id' in vals:
-                    #vals['name'] = self.env['ir.sequence'].with_context(force_company=vals['company_id']).next_by_code('sale.order') or _('New')
-                    pass
+                    vals['name'] = self.env['ir.sequence'].with_context(force_company=vals['company_id']).next_by_code('sale.order') or _('New')
                 else:
-                    #vals['name'] = self.env['ir.sequence'].next_by_code('sale.order') or _('New')
-                    pass
+                    vals['name'] = self.env['ir.sequence'].next_by_code('sale.order') or _('New')
         if any(f not in vals for f in ['partner_invoice_id', 'partner_shipping_id', 'pricelist_id']):
             partner = self.env['res.partner'].browse(vals.get('partner_id'))
             addr = partner.address_get(['delivery', 'invoice'])
@@ -86,16 +93,11 @@ class SaleOrder(models.Model):
             
             vals['pricelist_id'] = vals.setdefault('pricelist_id', partner.property_product_pricelist and partner.property_product_pricelist.id)
 
-
+        vals['name'] = self.name
         _logger.info("\n\n\nPoco antes de finalizar el create vals es: %s\n\n\n", vals)    
-        result = super(SaleOrder, self).create(vals)
+        result = super(SaleOrderNew, self).create(vals)
+        _logger.info("\n\n\n result : %s \n\n\n", result)
         return result
 
 
 
-    @api.multi
-    def variante(self):
-        self.ensure_one()
-        action = self.env.ref('crm_sale_order_extended.sale_order_variant').read()[0]   
-
-        return action

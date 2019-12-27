@@ -13,8 +13,7 @@
 						    <field name="name" readonly="1"/>
 					    </h1>
 				    </div>
-
-				    <button string="Crear Variante" name="variante" type="object" class="btn-primary" context="{'default_name': name, 'default_child': True, 'default_origin': origin, 'default_parent_id': active_id}"/>
+	<button string="Create Variant" name="variante" type="object" class="btn-primary" context="{'child': True}"/>
 			    </group>
 		    </xpath>
 		    <xpath expr="//group/group" position="inside">
