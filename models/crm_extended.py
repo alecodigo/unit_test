@@ -40,7 +40,7 @@ class Lead(models.Model):
 class SaleOrderNew(models.Model):
     _inherit = 'sale.order'
 
-    #name = fields.Char(string='Order Reference', required=False, copy=False, readonly=True, states={'draft': [('readonly', False)]}, index=True, default=lambda self: _('New'))
+    name = fields.Char(string='Order Reference', required=True, copy=False, readonly=True, states={'draft': [('readonly', False)]}, index=True, store=True, default=lambda self: _('New'))
     parent_id = fields.Many2one('sale.order', string='Parent')
     child = fields.Boolean(string='Child')
 
@@ -56,6 +56,7 @@ class SaleOrderNew(models.Model):
             else:
                 self.name = self.parent_id.name + "/" + "1"
                 _logger.info("\n\n\n\n %s \n\n", orders)
+
 
 
     @api.multi
@@ -77,26 +78,32 @@ class SaleOrderNew(models.Model):
 
     @api.model
     def create(self, vals):
-        _logger.info("\n\n\n vals: %s \n\n\n", vals)
-        if vals.get('child') == False:
-            if vals.get('name', _('New')) == _('New'):
-                if 'company_id' in vals:
-                    vals['name'] = self.env['ir.sequence'].with_context(force_company=vals['company_id']).next_by_code('sale.order') or _('New')
-                else:
-                    vals['name'] = self.env['ir.sequence'].next_by_code('sale.order') or _('New')
+
+        # Makes sure partner_invoice_id, partner_shipping_id and pricelist_id are defined
         if any(f not in vals for f in ['partner_invoice_id', 'partner_shipping_id', 'pricelist_id']):
             partner = self.env['res.partner'].browse(vals.get('partner_id'))
             addr = partner.address_get(['delivery', 'invoice'])
             vals['partner_invoice_id'] = vals.setdefault('partner_invoice_id', addr['invoice'])
-            
+
             vals['partner_shipping_id'] = vals.setdefault('partner_shipping_id', addr['delivery'])
-            
+
             vals['pricelist_id'] = vals.setdefault('pricelist_id', partner.property_product_pricelist and partner.property_product_pricelist.id)
 
-        vals['name'] = self.name
-        _logger.info("\n\n\nPoco antes de finalizar el create vals es: %s\n\n\n", vals)    
+        _logger.info("\n\n\n vals antes de un super: %s \n\n\n", vals)
         result = super(SaleOrderNew, self).create(vals)
-        _logger.info("\n\n\n result : %s \n\n\n", result)
+        _logger.info("\n\n\n result: %s \n\n\n", result.child)
+
+
+        if result.child == False:
+            _logger.info("\n\n\nSe ejecuto el ir.sequence modificado\n\n")
+            if result.name == _('New'):
+                if 'company_id' in result.company_id:
+                    result.name = self.env['ir.sequence'].with_context(force_company=result.company_id).next_by_code('sale.order') or _('New')
+                else:
+                    result.name = self.env['ir.sequence'].next_by_code('sale.order') or _('New')
+
+
+
         return result
 
 
