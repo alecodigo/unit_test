@@ -40,71 +40,94 @@ class Lead(models.Model):
 class SaleOrderNew(models.Model):
     _inherit = 'sale.order'
 
-    name = fields.Char(string='Order Reference', required=True, copy=False, readonly=True, states={'draft': [('readonly', False)]}, index=True, store=True, default=lambda self: _('New'))
+    #name = fields.Char(compute="_name_order", string='Order Reference', required=True, copy=False, readonly=True, states={'draft': [('readonly', False)]}, index=True, store=True, default=lambda self: _('Order'))
+    name = fields.Char(string='Order Reference', required=True, copy=False, readonly=True, states={'draft': [('readonly', False)]}, index=True, store=True, default=lambda self: _('Order'))
     parent_id = fields.Many2one('sale.order', string='Parent')
     child = fields.Boolean(string='Child')
 
 
-    @api.multi
-    @api.onchange('parent_id', 'child')
-    def _sequence_for_variant(self):
-        if self.parent_id and self.child:
-            orders = self.search_count([('parent_id', '=', self.parent_id.id),('child', '=', True)])
-            if orders:
-                _logger.info("\n\n %s \n\n", orders)
-                self.name = self.parent_id.name + "/" + str(orders)
-            else:
-                self.name = self.parent_id.name + "/" + "1"
-                _logger.info("\n\n\n\n %s \n\n", orders)
+
+    # @api.multi
+    #@api.depends('parent_id.name', 'child')
+    def _name_order(self):
+        #self.ensure_one()
+        for record in self:
+            #if self.parent_id.name and self.child:
+            if self.parent_id and self.child:
+                orders = self.search_count([('parent_id', '=', self.parent_id.id),('child', '=', True)])
+                if orders > 0:
+                    #record.name = record.parent_id.name + "/" + str(orders)
+                    name = record.parent_id.name + "/" + str(orders)
+                    _logger.info("\n\n self.parent_id.name %s\n\n", self.parent_id.name)
+                    #return record.name
+                    return name
+                else:
+                    #record.name = record.partner_id.name + "/" + "1"
+                    name = record.partner_id.name + "/" + "1"
+                    _logger.info("\n\n Hola record.name %s\n\n", record.name)
+                    #return record.name
+                    return name
+            #else:
+            #    _logger.info("\n\n\n\n  _name_order else : %s \n\n", self.parent_id.name)
+            #    record.name = record.parent_id.name + "/" + "1"
+        #if  self.parent_id and self.child:
+        #    orders = self.search_count([('parent_id', '=', self.parent_id.id),('child', '=', True)])
+        #    #record = self.env['sale.order'].search([('id', '=', self.parent_id.id),('name', '=', True)])
+        #    _logger.info("\n\n _name_order name es: %s \n\n", self.parent_id.name)
+        #    if orders:
+        #        self.name = self.parent_id.name + "/" + str(orders)
+        #    else:
+        #        _logger.info("\n\n\n\n  _name_order else : %s \n\n", self.parent_id.name)
+        #        self.name = self.parent_id.name + "/" + "1"
 
 
 
     @api.multi
     def variante(self):
         self.ensure_one()
-        action = self.env.ref('crm_sale_order_extended.sale_order_variant').read()[0]   
+        action = self.env.ref('crm_sale.sale_order_variant').read()[0]   
 
-        _logger.info("\n\n action: %s \n\n", action)
         return action
 
-
-    #@api.onchange('parent_id')
-    #def set_child(self):
-    #    if self.parent_id:
-    #        self.child = True
-    #    else:
-    #        self.child = False
 
 
     @api.model
     def create(self, vals):
 
-        # Makes sure partner_invoice_id, partner_shipping_id and pricelist_id are defined
-        if any(f not in vals for f in ['partner_invoice_id', 'partner_shipping_id', 'pricelist_id']):
-            partner = self.env['res.partner'].browse(vals.get('partner_id'))
-            addr = partner.address_get(['delivery', 'invoice'])
-            vals['partner_invoice_id'] = vals.setdefault('partner_invoice_id', addr['invoice'])
-
-            vals['partner_shipping_id'] = vals.setdefault('partner_shipping_id', addr['delivery'])
-
-            vals['pricelist_id'] = vals.setdefault('pricelist_id', partner.property_product_pricelist and partner.property_product_pricelist.id)
-
-        _logger.info("\n\n\n vals antes de un super: %s \n\n\n", vals)
-        result = super(SaleOrderNew, self).create(vals)
-        _logger.info("\n\n\n result: %s \n\n\n", result.child)
-
-
-        if result.child == False:
+        # El campo child No esta establecido
+        if vals['child'] == False:
             _logger.info("\n\n\nSe ejecuto el ir.sequence modificado\n\n")
-            if result.name == _('New'):
-                if 'company_id' in result.company_id:
-                    result.name = self.env['ir.sequence'].with_context(force_company=result.company_id).next_by_code('sale.order') or _('New')
-                else:
-                    result.name = self.env['ir.sequence'].next_by_code('sale.order') or _('New')
+            #if result.name == _('New'):
+            if 'company_id' in vals:
+                vals['name'] = self.env['ir.sequence'].with_context(force_company=vals['company_id']).next_by_code('sale.order')
+            else:
+                vals['name'] = self.env['ir.sequence'].next_by_code('sale.order')
+            _logger.info("\n\n vals tiene: %s \n\n", vals)
+            result = super().create(vals)
+            _logger.info("\n\n\n result: %s \n\n\n", result.name)
+            return result
+        
+        #El campo child esta establecido
+        else:
+            
+            #parent = self.search([('parent_id', '=', self.parent_id.id),('child', '=', False)], limit=1)
+            idx = vals['parent_id']
+            _logger.info("\n\n id is %s\n\n", idx)
+            parent = self.browse(idx)
+            account = self.search_count([('parent_id', '=', idx),('child', '=', True)])
+            _logger.info("\n\n parent is: %s\n\n", parent)
+            _logger.info("\n\n parent name is: %s\n\n", parent.name)
+            _logger.info("\n\n account is: %s\n\n", account)
+            if parent and (account > 0):
+
+                vals['name'] = parent.name + "/" + str(account)
+                return super().create(vals)
+            
+            else:
+                vals['name'] = parent.name + "/" + "1"
+                return super().create(vals)
 
 
-
-        return result
 
 
 
