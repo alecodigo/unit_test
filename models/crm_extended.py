@@ -120,7 +120,7 @@ class SaleOrderNew(models.Model):
             _logger.info("\n\n account is: %s\n\n", account)
             if parent and (account > 0):
 
-                vals['name'] = parent.name + "/" + str(account)
+                vals['name'] = parent.name + "/" + str(account + 1)
                 return super().create(vals)
             
             else:
