@@ -17,7 +17,7 @@
 			    </group>
 		    </xpath>
 		    <xpath expr="//group/group" position="inside">
-			    <field name="parent_id" attrs="{'required': [('child', '=', True)]}"/>
+			    <field name="parent_id" domain="[('child', '=', False)]" attrs="{'required': [('child', '=', True)]}"/>
 			    <field name="child"/>
 		    </xpath>
 	    </field>
