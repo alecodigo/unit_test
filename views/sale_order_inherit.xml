@@ -13,7 +13,7 @@
 						    <field name="name" readonly="1"/>
 					    </h1>
 				    </div>
-	<button string="Create Variant" name="variante" type="object" class="btn-primary" context="{'child': True}"/>
+				    <button string="Create Variant" name="variante" type="object" class="btn-primary" context="{'child': True}" attrs="{'invisible': [('child', '=', True)]}"/>
 			    </group>
 		    </xpath>
 		    <xpath expr="//group/group" position="inside">
