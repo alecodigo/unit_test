@@ -45,6 +45,12 @@ class SaleOrderNew(models.Model):
     child = fields.Boolean(string='Child')
 
 
+    @api.multi
+    def confirm_variant(self):
+        records_id = self.env['sale.order'].search([('parent_id', '=', self.parent_id.id),('child', '=', True)])
+        for record in records_id:
+            record.write({'state': 'cancel'})
+
 
     @api.multi
     def _action_confirm(self):

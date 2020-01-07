@@ -13,7 +13,16 @@
                             <field name="name" readonly="1"/>
                         </h1>
                     </div>
-                    <button string="Create Variant" name="variante" type="object" class="btn-primary" context="{'child': True}" attrs="{'invisible': [('child', '=', True)]}"/>
+                    <div>
+                        <button string="Create Variant" name="variante" type="object" class="btn-primary" context="{'child': True}" attrs="{'invisible': [('child', '=', True)]}"/>
+                        <button 
+                            string="Confirm"
+                            name="confirm_variant"
+                            type="object"
+                            class="btn-primary"
+                            attrs="{'invisible': [('child', '=', False)]}"
+                        />
+                    </div>
                 </group>
             </xpath>
             <xpath expr="//group/group" position="inside">
