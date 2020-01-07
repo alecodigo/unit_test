@@ -50,6 +50,38 @@ class SaleOrderNew(models.Model):
         records_id = self.env['sale.order'].search([('parent_id', '=', self.parent_id.id),('child', '=', True)])
         for record in records_id:
             record.write({'state': 'cancel'})
+        
+        if self.order_line:
+            res = []
+            data = {}
+            _logger.info("\n\n self es : %s\n\n", self)
+            _logger.info("\n\n self.parent_id.id %s\n\n",self.parent_id.id)
+            parent_id = self.env['sale.order'].search([('id', '=', self.parent_id.id),('child', '=', False)]) 
+            _logger.info("\n\n parent_id es: %s\n\n", parent_id)
+            if self.order_line.tax_id:
+                val = []
+                for i in self.order_line.tax_id:
+                    val.append((0,0, {'tax_id': i.id}))
+            _logger.info("\n\n val %s\n\n", val)
+            for item in self.order_line:
+                _logger.info("\n\nitem.tax_id es %s\n\n", item.tax_id)
+                #_logger.info("\n\nitem.tax_id.id es %s\n\n", item.tax_id.id)
+                res.append((0,0, {
+                            'product_id': item.product_id.id,
+                            'name': item.name,
+                            'product_uom_qty': item.product_uom_qty,
+                            'price_unit': item.price_unit,
+                            #'tax_id': self.order_line.tax_id.id,
+                            'price_subtotal': item.price_subtotal, 
+
+                }))
+            _logger.info("\n\n res %s\n\n", res)
+            _logger.info("\n\n antes del val %s\n\n", data)
+            data.update({'tax_id': val})
+            data.update({'order_line': res})
+            _logger.info("\n\n despues del val %s\n\n", data)
+            parent_id.write(data)
+
 
 
     @api.multi
