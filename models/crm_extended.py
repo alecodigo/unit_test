@@ -40,45 +40,18 @@ class Lead(models.Model):
 class SaleOrderNew(models.Model):
     _inherit = 'sale.order'
 
-    #name = fields.Char(compute="_name_order", string='Order Reference', required=True, copy=False, readonly=True, states={'draft': [('readonly', False)]}, index=True, store=True, default=lambda self: _('Order'))
     name = fields.Char(string='Order Reference', required=True, copy=False, readonly=True, states={'draft': [('readonly', False)]}, index=True, store=True, default=lambda self: _('Order'))
     parent_id = fields.Many2one('sale.order', string='Parent')
     child = fields.Boolean(string='Child')
 
 
 
-    # @api.multi
-    #@api.depends('parent_id.name', 'child')
-    def _name_order(self):
-        #self.ensure_one()
-        for record in self:
-            #if self.parent_id.name and self.child:
-            if self.parent_id and self.child:
-                orders = self.search_count([('parent_id', '=', self.parent_id.id),('child', '=', True)])
-                if orders > 0:
-                    #record.name = record.parent_id.name + "/" + str(orders)
-                    name = record.parent_id.name + "/" + str(orders)
-                    _logger.info("\n\n self.parent_id.name %s\n\n", self.parent_id.name)
-                    #return record.name
-                    return name
-                else:
-                    #record.name = record.partner_id.name + "/" + "1"
-                    name = record.partner_id.name + "/" + "1"
-                    _logger.info("\n\n Hola record.name %s\n\n", record.name)
-                    #return record.name
-                    return name
-            #else:
-            #    _logger.info("\n\n\n\n  _name_order else : %s \n\n", self.parent_id.name)
-            #    record.name = record.parent_id.name + "/" + "1"
-        #if  self.parent_id and self.child:
-        #    orders = self.search_count([('parent_id', '=', self.parent_id.id),('child', '=', True)])
-        #    #record = self.env['sale.order'].search([('id', '=', self.parent_id.id),('name', '=', True)])
-        #    _logger.info("\n\n _name_order name es: %s \n\n", self.parent_id.name)
-        #    if orders:
-        #        self.name = self.parent_id.name + "/" + str(orders)
-        #    else:
-        #        _logger.info("\n\n\n\n  _name_order else : %s \n\n", self.parent_id.name)
-        #        self.name = self.parent_id.name + "/" + "1"
+    @api.multi
+    def _action_confirm(self):
+        if self.child:
+            raise UserError(_("Budget variants cannot be confirmed. Before confirm this variant"))
+        else:
+            return super()._action_confirm()
 
 
 
