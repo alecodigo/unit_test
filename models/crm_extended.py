@@ -39,7 +39,7 @@ class SaleOrderNew(models.Model):
     name = fields.Char(string='Order Reference', required=True, copy=False, readonly=True, states={'draft': [('readonly', False)]}, index=True, store=True, default=lambda self: _('Order'))
     parent_id = fields.Many2one('sale.order', string='Parent')
     child = fields.Boolean(string='Child')
-
+    flag_child = fields.Boolean(string='Child')
 
     @api.multi
     def confirm_variant(self):
@@ -83,7 +83,7 @@ class SaleOrderNew(models.Model):
     @api.multi
     def variante(self):
         self.ensure_one()
-        action = self.env.ref('crm_sale.sale_order_variant').read()[0]   
+        action = self.env.ref('crm_sale.sale_order_variant').read()[0]
 
         return action
 

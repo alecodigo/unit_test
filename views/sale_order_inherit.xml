@@ -14,7 +14,7 @@
                         </h1>
                     </div>
                     <div>
-                        <button string="Create Variant" name="variante" type="object" class="btn-primary" context="{'child': True}" attrs="{'invisible': [('child', '=', True)]}"/>
+                        <button string="Create Variant" name="variante" type="object" class="btn-primary" attrs="{'invisible': [('child', '=', True)]}"/>
                         <button 
                             string="Confirm"
                             name="confirm_variant"
@@ -27,7 +27,8 @@
             </xpath>
             <xpath expr="//group/group" position="inside">
                 <field name="parent_id" domain="[('child', '=', False)]" attrs="{'required': [('child', '=', True)], 'readonly': [('child', '=', False)]}"/>
-                <field name="child" attrs="{'readonly': [('child', '=', False)]}"/>
+                <field name="flag_child" readonly="True"/>
+                <field name="child" invisible="True"/>
             </xpath>
         </field>
     </record>

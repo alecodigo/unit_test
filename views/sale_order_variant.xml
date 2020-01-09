@@ -6,6 +6,6 @@
 		<field name="view_type">form</field>
 		<field name="view_mode">form</field>
 		<field name="domain"></field>
-		<field name="context">{'default_child': True}</field>
+		<field name="context">{'default_child': True, 'default_flag_child': True}</field>
 	</record>
 </odoo>
