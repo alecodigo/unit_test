@@ -12,6 +12,20 @@ class Lead(models.Model):
     _inherit = 'crm.lead'
 
 
+
+
+    @api.multi
+    def action_set_won_rainbowman(self):
+        self.ensure_one()
+        if self.sale_number:
+            super().action_set_won_rainbowman()
+        else:
+            raise UserError(_('You need to create an opportunity first.'))
+
+
+
+
+
     @api.model
     def create(self, vals):
         # This code block is added by Odoolibre
