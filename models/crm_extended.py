@@ -55,20 +55,27 @@ class SaleOrderNew(models.Model):
 
     @api.multi
     def confirm_variant(self):
+        data = {}
         """ This function cancel everything variant and confirm the 
         variant sale order selected. """
         
         self.confirmed = True
 
+        
         # testear que pasa si records_id es False
+        # stage 1 cancel all child records
         records_id = self.env['sale.order'].search([('parent_id', '=', self.parent_id.id),('child', '=', True)])
         for record in records_id:
             record.write({'state': 'cancel'})
         
+        # stage 2 search the father record
+        parent_id = self.env['sale.order'].search([('id', '=', self.parent_id.id),('child', '=', False)]) 
+        
+
         if self.order_line:
             res = []
-            data = {}
-            parent_id = self.env['sale.order'].search([('id', '=', self.parent_id.id),('child', '=', False)]) 
+            
+            #parent_id = self.env['sale.order'].search([('id', '=', self.parent_id.id),('child', '=', False)]) 
             if self.order_line.tax_id:
                 val = []
                 for i in self.order_line.tax_id:
@@ -83,7 +90,7 @@ class SaleOrderNew(models.Model):
                             'price_subtotal': item.price_subtotal,
 
                 }))
-            data.update({'tax_id': val})
+            data.update({'tax_id': val, 'child_passed': self.name})
             data.update({'order_line': res})
             parent_id.write(data)
 
