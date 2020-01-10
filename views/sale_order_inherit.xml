@@ -33,6 +33,11 @@
                 <field name="flag_child" readonly="True"/>
                 <field name="child" invisible="True"/>
             </xpath>
+            <xpath expr="//group/group[2]" position="after">
+                <group col="2">
+                    <field name="child_passed"/>
+                </group>
+            </xpath>
         </field>
     </record>
 

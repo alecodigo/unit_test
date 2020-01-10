@@ -41,6 +41,7 @@ class SaleOrderNew(models.Model):
     child = fields.Boolean(string='Child')
     flag_child = fields.Boolean(string='Child')
     confirmed = fields.Boolean(string='Confirmed')
+    child_passed = fields.Char(string='Child passed')
 
 
     @api.multi
@@ -79,7 +80,8 @@ class SaleOrderNew(models.Model):
                             'product_uom_qty': item.product_uom_qty,
                             'price_unit': item.price_unit,
                             #'tax_id': self.order_line.tax_id.id,
-                            'price_subtotal': item.price_subtotal, 
+                            'price_subtotal': item.price_subtotal,
+                            'child_passed': item.child_passed,
 
                 }))
             data.update({'tax_id': val})
