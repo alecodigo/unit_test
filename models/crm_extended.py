@@ -42,6 +42,16 @@ class SaleOrderNew(models.Model):
     flag_child = fields.Boolean(string='Child')
     confirmed = fields.Boolean(string='Confirmed')
 
+
+    @api.multi
+    def action_draft(self):
+        """ Sale order variant can't not be send to sale order draft again."""
+        if self.child and self.confirmed:
+            raise UserError(_("The sale order variant is confirmed."))
+        else:
+            return super().action_draft()
+
+
     @api.multi
     def confirm_variant(self):
         """ This function cancel everything variant and confirm the 
