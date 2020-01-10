@@ -40,9 +40,15 @@ class SaleOrderNew(models.Model):
     parent_id = fields.Many2one('sale.order', string='Parent')
     child = fields.Boolean(string='Child')
     flag_child = fields.Boolean(string='Child')
+    confirmed = fields.Boolean(string='Confirmed')
 
     @api.multi
     def confirm_variant(self):
+        """ This function cancel everything variant and confirm the 
+        variant sale order selected. """
+        self.confirmed = True
+
+        # testear que pasa si records_id es False
         records_id = self.env['sale.order'].search([('parent_id', '=', self.parent_id.id),('child', '=', True)])
         for record in records_id:
             record.write({'state': 'cancel'})
