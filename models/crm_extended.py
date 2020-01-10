@@ -18,7 +18,7 @@ class Lead(models.Model):
         if self.sale_number:
             super().action_set_won_rainbowman()
         else:
-            raise UserError(_('You need to create an opportunity first.'))
+            raise UserError(_("You need to create an opportunity first."))
 
 
     @api.model
@@ -81,7 +81,6 @@ class SaleOrderNew(models.Model):
                             'price_unit': item.price_unit,
                             #'tax_id': self.order_line.tax_id.id,
                             'price_subtotal': item.price_subtotal,
-                            'child_passed': item.child_passed,
 
                 }))
             data.update({'tax_id': val})

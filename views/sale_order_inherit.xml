@@ -35,7 +35,7 @@
             </xpath>
             <xpath expr="//group/group[2]" position="after">
                 <group col="2">
-                    <field name="child_passed"/>
+                    <field name="child_passed" readonly="True"/>
                 </group>
             </xpath>
         </field>
