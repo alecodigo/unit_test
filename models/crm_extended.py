@@ -46,6 +46,7 @@ class SaleOrderNew(models.Model):
     def confirm_variant(self):
         """ This function cancel everything variant and confirm the 
         variant sale order selected. """
+        
         self.confirmed = True
 
         # testear que pasa si records_id es False

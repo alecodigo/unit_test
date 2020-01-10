@@ -12,11 +12,10 @@
                         <h1>
                             <field name="name" readonly="1"/>
                         </h1>
-                        <group col="2">
-                            <field name="confirmed" readonly="True" attrs="{'invisible': [('confirmed', '=', False)]}"/>
-                        </group>
                     </div>
                     <div>
+                        <group col="2">
+                            <field name="confirmed" readonly="True" attrs="{'invisible': [('confirmed', '=', False)]}"/>
                         <button string="Create Variant" name="variante" type="object" class="btn-primary" attrs="{'invisible': [('child', '=', True)]}"/>
                         <button 
                             string="Confirm"
@@ -25,6 +24,7 @@
                             class="btn-primary"
                             attrs="{'invisible': ['|',('child', '=', False),('confirmed', '=', True)]}"
                         />
+                    </group>
                     </div>
                 </group>
             </xpath>
