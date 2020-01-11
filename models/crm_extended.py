@@ -108,6 +108,7 @@ class SaleOrderNew(models.Model):
         res = []
         action = self.env.ref('crm_sale.action_sale_order_variant').read()[0]
 
+        _logger.info("\n\n product_uom %s\n\n", self)
         if self.order_line:
 
             val = []
@@ -123,8 +124,13 @@ class SaleOrderNew(models.Model):
                             'price_unit': item.price_unit,
                             'tax_id': val,
                             'price_subtotal': item.price_subtotal,
+                            'product_uom': item.product_uom.id,
                 }))
+            _logger.info("\n\n res %s\n\n", res)
 
+        tags = []
+        for tag in self.tag_ids:
+            tags.append((0,0, {'tag_ids': tag.id}))
 
 
         action['context'] = {
@@ -135,10 +141,12 @@ class SaleOrderNew(models.Model):
             'default_child': True,
             'default_flag_child': True,
             'default_order_line': res,
-            'default_note' : self.note,
+            'default_note': self.note,
 
+            'tag_ids': tags,
             'default_client_order_ref': self.client_order_ref,
 
+            'default_date_order': self.date_order,
             'default_fiscal_position_id': self.fiscal_position_id,
 
             'default_origin': self.origin,
@@ -148,7 +156,6 @@ class SaleOrderNew(models.Model):
             'default_opportunity_id': self.opportunity_id.id,
         }
 
-        _logger.info("\n\n action['context'] {} \n\n".format(action['context']))
 
         return action
 
