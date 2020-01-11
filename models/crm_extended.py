@@ -60,7 +60,6 @@ class SaleOrderNew(models.Model):
         variant sale order selected. """
         
         self.confirmed = True
-
         
         # testear que pasa si records_id es False
         # stage 1 cancel all child records
@@ -95,7 +94,6 @@ class SaleOrderNew(models.Model):
             parent_id.write(data)
 
 
-
     @api.multi
     def _action_confirm(self):
         if self.child:
@@ -104,11 +102,53 @@ class SaleOrderNew(models.Model):
             return super()._action_confirm()
 
 
-
     @api.multi
-    def variante(self):
-        self.ensure_one()
-        action = self.env.ref('crm_sale.sale_order_variant').read()[0]
+    def variante(self, context):
+        #self.ensure_one()
+        res = []
+        action = self.env.ref('crm_sale.action_sale_order_variant').read()[0]
+
+        if self.order_line:
+
+            val = []
+            for line in self.order_line:
+                for tax in line.tax_id:
+                    val.append((0,0, {'tax_id': tax.id})) 
+
+            for item in self.order_line:
+                res.append((0,0, {
+                            'product_id': item.product_id.id,
+                            'name': item.name,
+                            'product_uom_qty': item.product_uom_qty,
+                            'price_unit': item.price_unit,
+                            'tax_id': val,
+                            'price_subtotal': item.price_subtotal,
+                }))
+
+
+
+        action['context'] = {
+            
+            'default_parent_id': self.id,
+            'default_partner_id': self.partner_id.id, 
+
+            'default_child': True,
+            'default_flag_child': True,
+            'default_order_line': res,
+            'default_note' : self.note,
+
+            'default_client_order_ref': self.client_order_ref,
+
+            'default_fiscal_position_id': self.fiscal_position_id,
+
+            'default_origin': self.origin,
+            'default_campaign_id': self.campaign_id.id,
+            'default_medium_id': self.medium_id.id,
+            'default_source_id': self.source_id.id,
+            'default_opportunity_id': self.opportunity_id.id,
+        }
+
+        _logger.info("\n\n action['context'] {} \n\n".format(action['context']))
 
         return action
 
