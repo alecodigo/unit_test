@@ -41,4 +41,16 @@
         </field>
     </record>
 
+    <record id="view_order_line_tree_inherit" model="ir.ui.view">
+        <field name="name">sale.order.line.tree.inherit</field>
+        <field name="model">sale.order.line</field>
+        <field name="inherit_id" ref="sale.view_order_line_tree"/>
+        <field name="arch" type="xml">
+            <xpath expr="field[@name='order_id']" position="after">
+                <field name="id_inherit"/>
+            </xpath>
+        </field>
+
+    </record>
+
 </odoo>

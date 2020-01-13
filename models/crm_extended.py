@@ -32,6 +32,12 @@ class Lead(models.Model):
         return result
 
 
+class SaleOrderLine(models.Model):
+    _inherit = 'sale.order.line'
+
+    id_inherit = fields.Integer(string='id_inherit')
+
+
 class SaleOrderNew(models.Model):
     _inherit = 'sale.order'
 
@@ -55,43 +61,80 @@ class SaleOrderNew(models.Model):
 
     @api.multi
     def confirm_variant(self):
-        data = {}
         """ This function cancel everything variant and confirm the 
         variant sale order selected. """
+        
+        data = {}
         
         self.confirmed = True
         
         # testear que pasa si records_id es False
         # stage 1 cancel all child records
         records_id = self.env['sale.order'].search([('parent_id', '=', self.parent_id.id),('child', '=', True)])
-        for record in records_id:
-            record.write({'state': 'cancel'})
+        if records_id:
+            for record in records_id:
+                record.write({'state': 'cancel'})
         
-        # stage 2 search the father record
-        parent_id = self.env['sale.order'].search([('id', '=', self.parent_id.id),('child', '=', False)]) 
+        # stage 2 search the parent record
+        parent = self.env['sale.order'].search([('id', '=', self.parent_id.id),('child', '=', False)]) 
+        _logger.info("\n\n partner_id.order_line %s\n\n", parent.order_line)
         
+        # stage 3 si es verdadero comienzo a verificar 
+        # si actualizo o creo un registro
+        # verifico si existe en verdad un registro padre
+        if parent:
+            if self.order_line:
+                res = []    
+                vals = []
+                for line in self.order_line:
+                    for tax in line.tax_id:
+                        vals.append((0,0, {'tax_id': tax.id})) 
 
-        if self.order_line:
-            res = []
-            
-            #parent_id = self.env['sale.order'].search([('id', '=', self.parent_id.id),('child', '=', False)]) 
-            if self.order_line.tax_id:
-                val = []
-                for i in self.order_line.tax_id:
-                    val.append((0,0, {'tax_id': i.id}))
-            for item in self.order_line:
-                res.append((0,0, {
+                for item in self.order_line:
+                    _logger.info("\n\n item.id_inherit %s\n\n",item.id_inherit)
+                    # update
+                    if item.id_inherit > 0:
+                        res.append((1,item.id_inherit, {
                             'product_id': item.product_id.id,
                             'name': item.name,
                             'product_uom_qty': item.product_uom_qty,
                             'price_unit': item.price_unit,
-                            #'tax_id': self.order_line.tax_id.id,
+                            #'tax_id': vals,
                             'price_subtotal': item.price_subtotal,
+                        }))
+                    # creo el registro nuevo
+                    else:
+                        res.append((0,0, {
+                            'product_id': item.product_id.id,
+                            'name': item.name,
+                            'product_uom_qty': item.product_uom_qty,
+                            'price_unit': item.price_unit,
+                            #'tax_id': vals,
+                            'price_subtotal': item.price_subtotal,
+                        }))
 
-                }))
-            data.update({'tax_id': val, 'child_passed': self.name})
-            data.update({'order_line': res})
-            parent_id.write(data)
+
+        #data.update({'tax_id': val or False, 'child_passed': self.name})
+        data.update({
+                       'order_line': res or False, 
+                       'child_passed': self.name,
+                       'note': self.note,
+                       #'tag_ids': tags,
+                       'client_order_ref': self.client_order_ref,
+                       'date_order': self.date_order,
+                       'fiscal_position_id': self.fiscal_position_id,
+
+                       'origin': self.origin,
+                       'campaign_id': self.campaign_id.id,
+                       'medium_id': self.medium_id.id,
+                       'source_id': self.source_id.id,
+                       'opportunity_id': self.opportunity_id.id,
+
+                       })
+
+        _logger.info("Que mas contiene data %s", data)
+        parent.write(data)
+
 
 
     @api.multi
@@ -118,6 +161,7 @@ class SaleOrderNew(models.Model):
 
             for item in self.order_line:
                 res.append((0,0, {
+                            'id_inherit': item.id,
                             'product_id': item.product_id.id,
                             'name': item.name,
                             'product_uom_qty': item.product_uom_qty,
