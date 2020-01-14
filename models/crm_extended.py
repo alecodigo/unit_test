@@ -146,7 +146,7 @@ class SaleOrderNew(models.Model):
 
 
     @api.multi
-    def variante(self, context):
+    def create_variant(self, context):
         #self.ensure_one()
         res = []
         action = self.env.ref('crm_sale.action_sale_order_variant').read()[0]

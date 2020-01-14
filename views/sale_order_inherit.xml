@@ -16,7 +16,7 @@
                     <div>
                         <group col="2">
                             <field name="confirmed" readonly="True" attrs="{'invisible': [('confirmed', '=', False)]}"/>
-                        <button string="Create Variant" name="variante" type="object" class="btn-primary" attrs="{'invisible': [('child', '=', True)]}"/>
+                        <button string="Create Variant" name="create_variant" type="object" class="btn-primary" attrs="{'invisible': [('child', '=', True)]}"/>
                         <button 
                             string="Confirm"
                             name="confirm_variant"
