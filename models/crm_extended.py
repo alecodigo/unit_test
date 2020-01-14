@@ -173,8 +173,12 @@ class SaleOrderNew(models.Model):
             _logger.info("\n\n res %s\n\n", res)
 
         tags = []
+        _id = []
         for tag in self.tag_ids:
-            tags.append((0,0, {'tag_ids': tag.id}))
+            _id.append(tag.id)
+            _logger.info("\n\n _id %s\n\n", _id)
+        tags = [(6,0,_id)] 
+        _logger.info("\n\n tags %s\n\n", tags)
 
 
         action['context'] = {
@@ -187,7 +191,7 @@ class SaleOrderNew(models.Model):
             'default_order_line': res,
             'default_note': self.note,
 
-            'tag_ids': tags,
+            'default_tag_ids': tags,
             'default_client_order_ref': self.client_order_ref,
 
             'default_date_order': self.date_order,
