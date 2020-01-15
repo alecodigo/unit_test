@@ -166,7 +166,7 @@ class SaleOrderNew(models.Model):
                             'name': item.name,
                             'product_uom_qty': item.product_uom_qty,
                             'price_unit': item.price_unit,
-                            'tax_id': val,
+                            #'tax_id': val,
                             'price_subtotal': item.price_subtotal,
                             'product_uom': item.product_uom.id,
                 }))
