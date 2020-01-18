@@ -18,7 +18,7 @@ class Lead(models.Model):
         if self.sale_number:
             super().action_set_won_rainbowman()
         else:
-            raise UserError(_('You need to create an opportunity first.'))
+            raise UserError(_("You need to create an opportunity first."))
 
 
     @api.model
@@ -32,6 +32,12 @@ class Lead(models.Model):
         return result
 
 
+class SaleOrderLine(models.Model):
+    _inherit = 'sale.order.line'
+
+    id_inherit = fields.Integer(string='id_inherit')
+
+
 class SaleOrderNew(models.Model):
     _inherit = 'sale.order'
 
@@ -40,34 +46,94 @@ class SaleOrderNew(models.Model):
     parent_id = fields.Many2one('sale.order', string='Parent')
     child = fields.Boolean(string='Child')
     flag_child = fields.Boolean(string='Child')
+    confirmed = fields.Boolean(string='Confirmed')
+    child_passed = fields.Char(string='Child passed')
+
+
+    @api.multi
+    def action_draft(self):
+        """ Sale order variant can't not be send to sale order draft again."""
+        if self.child and self.confirmed:
+            raise UserError(_("The sale order variant is confirmed."))
+        else:
+            return super().action_draft()
+
 
     @api.multi
     def confirm_variant(self):
-        records_id = self.env['sale.order'].search([('parent_id', '=', self.parent_id.id),('child', '=', True)])
-        for record in records_id:
-            record.write({'state': 'cancel'})
+        """ This function cancel everything variant and confirm the 
+        variant sale order selected. """
         
-        if self.order_line:
-            res = []
-            data = {}
-            parent_id = self.env['sale.order'].search([('id', '=', self.parent_id.id),('child', '=', False)]) 
-            if self.order_line.tax_id:
-                val = []
-                for i in self.order_line.tax_id:
-                    val.append((0,0, {'tax_id': i.id}))
-            for item in self.order_line:
-                res.append((0,0, {
+        data = {}
+        
+        self.confirmed = True
+        
+        # testear que pasa si records_id es False
+        # stage 1 cancel all child records
+        records_id = self.env['sale.order'].search([('parent_id', '=', self.parent_id.id),('child', '=', True)])
+        if records_id:
+            for record in records_id:
+                record.write({'state': 'cancel'})
+        
+        # stage 2 search the parent record
+        parent = self.env['sale.order'].search([('id', '=', self.parent_id.id),('child', '=', False)]) 
+        _logger.info("\n\n partner_id.order_line %s\n\n", parent.order_line)
+        
+        # stage 3 si es verdadero comienzo a verificar 
+        # si actualizo o creo un registro
+        # verifico si existe en verdad un registro padre
+        if parent:
+            if self.order_line:
+                res = []    
+                vals = []
+                for line in self.order_line:
+                    for tax in line.tax_id:
+                        vals.append((0,0, {'tax_id': tax.id})) 
+
+                for item in self.order_line:
+                    _logger.info("\n\n item.id_inherit %s\n\n",item.id_inherit)
+                    # update
+                    if item.id_inherit > 0:
+                        res.append((1,item.id_inherit, {
                             'product_id': item.product_id.id,
                             'name': item.name,
                             'product_uom_qty': item.product_uom_qty,
                             'price_unit': item.price_unit,
-                            #'tax_id': self.order_line.tax_id.id,
-                            'price_subtotal': item.price_subtotal, 
+                            #'tax_id': vals,
+                            'price_subtotal': item.price_subtotal,
+                        }))
+                    # creo el registro nuevo
+                    else:
+                        res.append((0,0, {
+                            'product_id': item.product_id.id,
+                            'name': item.name,
+                            'product_uom_qty': item.product_uom_qty,
+                            'price_unit': item.price_unit,
+                            #'tax_id': vals,
+                            'price_subtotal': item.price_subtotal,
+                        }))
 
-                }))
-            data.update({'tax_id': val})
-            data.update({'order_line': res})
-            parent_id.write(data)
+
+        #data.update({'tax_id': val or False, 'child_passed': self.name})
+        data.update({
+                       'order_line': res or False, 
+                       'child_passed': self.name,
+                       'note': self.note,
+                       #'tag_ids': tags,
+                       'client_order_ref': self.client_order_ref,
+                       'date_order': self.date_order,
+                       'fiscal_position_id': self.fiscal_position_id,
+
+                       'origin': self.origin,
+                       'campaign_id': self.campaign_id.id,
+                       'medium_id': self.medium_id.id,
+                       'source_id': self.source_id.id,
+                       'opportunity_id': self.opportunity_id.id,
+
+                       })
+
+        _logger.info("Que mas contiene data %s", data)
+        parent.write(data)
 
 
 
@@ -79,11 +145,50 @@ class SaleOrderNew(models.Model):
             return super()._action_confirm()
 
 
-
     @api.multi
-    def variante(self):
-        self.ensure_one()
-        action = self.env.ref('crm_sale.sale_order_variant').read()[0]
+    def create_variant(self, context):
+        """This method create a new sale order variant."""
+        res = []
+        action = self.env.ref('crm_sale.action_sale_order_variant').read()[0]
+
+        if self.order_line:
+
+
+            for item in self.order_line:
+                res.append((0,0, {
+                            'id_inherit': item.id,
+                            'product_id': item.product_id.id,
+                            'name': item.name,
+                            'product_uom_qty': item.product_uom_qty,
+                            'price_unit': item.price_unit,
+                            #'tax_id': [(6,0, item.tax_id.ids)],
+                            'price_subtotal': item.price_subtotal,
+                            'product_uom': item.product_uom.id,
+                }))
+  
+        action['context'] = {
+            
+            'default_parent_id': self.id,
+            'default_partner_id': self.partner_id.id, 
+
+            'default_child': True,
+            'default_flag_child': True,
+            'default_order_line': res,
+            'default_note': self.note,
+
+            'default_tag_ids': [(6, 0, self.tag_ids.ids)],
+            'default_client_order_ref': self.client_order_ref,
+
+            'default_date_order': self.date_order,
+            'default_fiscal_position_id': self.fiscal_position_id,
+
+            'default_origin': self.origin,
+            'default_campaign_id': self.campaign_id.id,
+            'default_medium_id': self.medium_id.id,
+            'default_source_id': self.source_id.id,
+            'default_opportunity_id': self.opportunity_id.id,
+        }
+        
 
         return action
 

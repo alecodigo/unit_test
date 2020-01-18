@@ -14,14 +14,17 @@
                         </h1>
                     </div>
                     <div>
-                        <button string="Create Variant" name="variante" type="object" class="btn-primary" attrs="{'invisible': [('child', '=', True)]}"/>
+                        <group col="2">
+                            <field name="confirmed" readonly="True" attrs="{'invisible': [('confirmed', '=', False)]}"/>
+                        <button string="Create Variant" name="create_variant" type="object" class="btn-primary" attrs="{'invisible': [('child', '=', True)]}"/>
                         <button 
                             string="Confirm"
                             name="confirm_variant"
                             type="object"
                             class="btn-primary"
-                            attrs="{'invisible': [('child', '=', False)]}"
+                            attrs="{'invisible': ['|',('child', '=', False),('confirmed', '=', True)]}"
                         />
+                    </group>
                     </div>
                 </group>
             </xpath>
@@ -30,7 +33,24 @@
                 <field name="flag_child" readonly="True"/>
                 <field name="child" invisible="True"/>
             </xpath>
+            <xpath expr="//group/group[2]" position="after">
+                <group col="2">
+                    <field name="child_passed" readonly="True"/>
+                </group>
+            </xpath>
         </field>
+    </record>
+
+    <record id="view_order_line_tree_inherit" model="ir.ui.view">
+        <field name="name">sale.order.line.tree.inherit</field>
+        <field name="model">sale.order.line</field>
+        <field name="inherit_id" ref="sale.view_order_line_tree"/>
+        <field name="arch" type="xml">
+            <xpath expr="field[@name='order_id']" position="after">
+                <field name="id_inherit"/>
+            </xpath>
+        </field>
+
     </record>
 
 </odoo>
