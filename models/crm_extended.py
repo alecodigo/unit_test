@@ -147,17 +147,12 @@ class SaleOrderNew(models.Model):
 
     @api.multi
     def create_variant(self, context):
-        #self.ensure_one()
+        """This method create a new sale order variant."""
         res = []
         action = self.env.ref('crm_sale.action_sale_order_variant').read()[0]
 
-        _logger.info("\n\n product_uom %s\n\n", self)
         if self.order_line:
 
-            val = []
-            for line in self.order_line:
-                for tax in line.tax_id:
-                    val.append((0,0, {'tax_id': tax.id})) 
 
             for item in self.order_line:
                 res.append((0,0, {
@@ -166,14 +161,11 @@ class SaleOrderNew(models.Model):
                             'name': item.name,
                             'product_uom_qty': item.product_uom_qty,
                             'price_unit': item.price_unit,
-                            #'tax_id': val,
+                            #'tax_id': [(6,0, item.tax_id.ids)],
                             'price_subtotal': item.price_subtotal,
                             'product_uom': item.product_uom.id,
                 }))
-            _logger.info("\n\n res %s\n\n", res)
-
-    
-
+  
         action['context'] = {
             
             'default_parent_id': self.id,
@@ -196,7 +188,7 @@ class SaleOrderNew(models.Model):
             'default_source_id': self.source_id.id,
             'default_opportunity_id': self.opportunity_id.id,
         }
-
+        
 
         return action
 
