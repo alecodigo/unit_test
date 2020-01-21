@@ -5,7 +5,6 @@ import logging
 from odoo import api, fields, models, _
 from odoo.exceptions import ValidationError, UserError
 
-_logger = logging.getLogger(__name__)
 
 
 class Lead(models.Model):
@@ -66,10 +65,6 @@ class SaleOrderNew(models.Model):
         
         data = {}
         
-        self.confirmed = True
-        
-        # testear que pasa si records_id es False
-        # stage 1 cancel all child records
         records_id = self.env['sale.order'].search([('parent_id', '=', self.parent_id.id),('child', '=', True)])
         if records_id:
             for record in records_id:
@@ -77,23 +72,14 @@ class SaleOrderNew(models.Model):
         
         # stage 2 search the parent record
         parent = self.env['sale.order'].search([('id', '=', self.parent_id.id),('child', '=', False)]) 
-        _logger.info("\n\n partner_id.order_line %s\n\n", parent.order_line)
-        
-        # stage 3 si es verdadero comienzo a verificar 
-        # si actualizo o creo un registro
-        # verifico si existe en verdad un registro padre
+
         if parent:
             if self.order_line:
-                res = []    
-                vals = []
-                for line in self.order_line:
-                    for tax in line.tax_id:
-                        vals.append((0,0, {'tax_id': tax.id})) 
-
+                res = []
                 for item in self.order_line:
-                    _logger.info("\n\n item.id_inherit %s\n\n",item.id_inherit)
                     # update
-                    if item.id_inherit > 0:
+                    parent_id = self.env['sale.order'].browse(self.parent_id.id).order_line.ids
+                    if item.id_inherit in parent_id:
                         res.append((1,item.id_inherit, {
                             'product_id': item.product_id.id,
                             'name': item.name,
@@ -102,24 +88,22 @@ class SaleOrderNew(models.Model):
                             #'tax_id': vals,
                             'price_subtotal': item.price_subtotal,
                         }))
-                    # creo el registro nuevo
                     else:
+                        # create a new record
                         res.append((0,0, {
-                            'product_id': item.product_id.id,
-                            'name': item.name,
-                            'product_uom_qty': item.product_uom_qty,
-                            'price_unit': item.price_unit,
-                            #'tax_id': vals,
-                            'price_subtotal': item.price_subtotal,
-                        }))
+                                'product_id': item.product_id.id,
+                                'name': item.name,
+                                'product_uom_qty': item.product_uom_qty,
+                                'price_unit': item.price_unit,
+                                #'tax_id': vals,
+                                'price_subtotal': item.price_subtotal,
+                            }))
 
-
-        #data.update({'tax_id': val or False, 'child_passed': self.name})
         data.update({
                        'order_line': res or False, 
                        'child_passed': self.name,
                        'note': self.note,
-                       #'tag_ids': tags,
+                       'tag_ids': [(6, 0, self.tag_ids.ids)],
                        'client_order_ref': self.client_order_ref,
                        'date_order': self.date_order,
                        'fiscal_position_id': self.fiscal_position_id,
@@ -132,8 +116,9 @@ class SaleOrderNew(models.Model):
 
                        })
 
-        _logger.info("Que mas contiene data %s", data)
         parent.write(data)
+
+        self.confirmed = True
 
 
 
@@ -199,7 +184,6 @@ class SaleOrderNew(models.Model):
 
         # El campo child No esta establecido
         if vals['child'] == False:
-            #if result.name == _('New'):
             if 'company_id' in vals:
                 vals['name'] = self.env['ir.sequence'].with_context(force_company=vals['company_id']).next_by_code('sale.order')
             else:
@@ -207,10 +191,7 @@ class SaleOrderNew(models.Model):
             result = super().create(vals)
             return result
         
-        #El campo child esta establecido
-        else:
-            
-            #parent = self.search([('parent_id', '=', self.parent_id.id),('child', '=', False)], limit=1)
+        else:            
             idx = vals['parent_id']
             parent = self.browse(idx)
             account = self.search_count([('parent_id', '=', idx),('child', '=', True)])

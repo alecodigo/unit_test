@@ -22,7 +22,7 @@
                             name="confirm_variant"
                             type="object"
                             class="btn-primary"
-                            attrs="{'invisible': ['|',('child', '=', False),('confirmed', '=', True)]}"
+                            attrs="{'invisible': ['|',('child', '=',     False),('confirmed', '=', True)]}"
                         />
                     </group>
                     </div>
