@@ -66,14 +66,13 @@ class SaleOrderNew(models.Model):
         
         data = {}
         
-        self.confirmed = True
+    
         
-        # testear que pasa si records_id es False
         # stage 1 cancel all child records
-        records_id = self.env['sale.order'].search([('parent_id', '=', self.parent_id.id),('child', '=', True)])
-        if records_id:
-            for record in records_id:
-                record.write({'state': 'cancel'})
+        #records_id = self.env['sale.order'].search([('parent_id', '=', self.parent_id.id),('child', '=', True)])
+        #if records_id:
+        #    for record in records_id:
+        #        record.write({'state': 'cancel'})
         
         # stage 2 search the parent record
         parent = self.env['sale.order'].search([('id', '=', self.parent_id.id),('child', '=', False)]) 
@@ -84,16 +83,13 @@ class SaleOrderNew(models.Model):
         # verifico si existe en verdad un registro padre
         if parent:
             if self.order_line:
-                res = []    
-                vals = []
-                for line in self.order_line:
-                    for tax in line.tax_id:
-                        vals.append((0,0, {'tax_id': tax.id})) 
-
+                res = []
                 for item in self.order_line:
                     _logger.info("\n\n item.id_inherit %s\n\n",item.id_inherit)
                     # update
-                    if item.id_inherit > 0:
+                    parent_id = self.env['sale.order'].browse(self.parent_id.id).order_line.ids
+                    _logger.info("\n\n item.id_inherit %s parent_id %s\n\n", item.id_inherit, parent_id)
+                    if item.id_inherit in parent_id:
                         res.append((1,item.id_inherit, {
                             'product_id': item.product_id.id,
                             'name': item.name,
@@ -102,24 +98,22 @@ class SaleOrderNew(models.Model):
                             #'tax_id': vals,
                             'price_subtotal': item.price_subtotal,
                         }))
-                    # creo el registro nuevo
                     else:
+                        # create a new record
                         res.append((0,0, {
-                            'product_id': item.product_id.id,
-                            'name': item.name,
-                            'product_uom_qty': item.product_uom_qty,
-                            'price_unit': item.price_unit,
-                            #'tax_id': vals,
-                            'price_subtotal': item.price_subtotal,
-                        }))
+                                'product_id': item.product_id.id,
+                                'name': item.name,
+                                'product_uom_qty': item.product_uom_qty,
+                                'price_unit': item.price_unit,
+                                #'tax_id': vals,
+                                'price_subtotal': item.price_subtotal,
+                            }))
 
-
-        #data.update({'tax_id': val or False, 'child_passed': self.name})
         data.update({
                        'order_line': res or False, 
                        'child_passed': self.name,
                        'note': self.note,
-                       #'tag_ids': tags,
+                       'tag_ids': [(6, 0, self.tag_ids.ids)],
                        'client_order_ref': self.client_order_ref,
                        'date_order': self.date_order,
                        'fiscal_position_id': self.fiscal_position_id,
@@ -134,6 +128,8 @@ class SaleOrderNew(models.Model):
 
         _logger.info("Que mas contiene data %s", data)
         parent.write(data)
+
+        self.confirmed = True
 
 
 
