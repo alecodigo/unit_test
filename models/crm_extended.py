@@ -47,6 +47,8 @@ class SaleOrderNew(models.Model):
     flag_child = fields.Boolean(string='Child')
     confirmed = fields.Boolean(string='Confirmed')
     child_passed = fields.Char(string='Child passed')
+    measure_date = fields.Date(string='Date Measure')
+    deploy_date = fields.Date(string='Date of Production')
 
 
     @api.multi
