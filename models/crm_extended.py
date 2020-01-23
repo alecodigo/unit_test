@@ -17,7 +17,7 @@ class Lead(models.Model):
         if self.sale_number:
             super().action_set_won_rainbowman()
         else:
-            raise UserError(_("You need to create an opportunity first."))
+            raise UserError(_("You need to create an order sale first."))
 
 
     @api.model
@@ -47,6 +47,8 @@ class SaleOrderNew(models.Model):
     flag_child = fields.Boolean(string='Child')
     confirmed = fields.Boolean(string='Confirmed')
     child_passed = fields.Char(string='Child passed')
+    measure_date = fields.Date(string='Date Measure')
+    deploy_date = fields.Date(string='Date of Production')
 
 
     @api.multi

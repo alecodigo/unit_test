@@ -28,6 +28,10 @@
                     </div>
                 </group>
             </xpath>
+            <xpath expr="//field[@name='validity_date']" position="after">
+                <field name="measure_date"/>
+                <field name="deploy_date"/>
+            </xpath>
             <xpath expr="//group/group" position="inside">
                 <field name="parent_id" domain="[('child', '=', False)]" attrs="{'required': [('child', '=', True)], 'readonly': [('child', '=', False)]}"/>
                 <field name="flag_child" readonly="True"/>
