@@ -17,7 +17,7 @@ class Lead(models.Model):
         if self.sale_number:
             super().action_set_won_rainbowman()
         else:
-            raise UserError(_("You need to create an opportunity first."))
+            raise UserError(_("You need to create an order sale first."))
 
 
     @api.model

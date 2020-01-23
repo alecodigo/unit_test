@@ -6,33 +6,33 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 11.0-20190313\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-01-14 18:39-0400\n"
-"PO-Revision-Date: 2020-01-14 18:46-0400\n"
+"POT-Creation-Date: 2020-01-23 22:41+0000\n"
+"PO-Revision-Date: 2020-01-23 18:46-0400\n"
+"Last-Translator: <>\n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"Plural-Forms: \n"
+"Language: es\n"
 "X-Generator: Poedit 1.8.11\n"
-"Last-Translator: \n"
-"Language: es_ES\n"
 
 #. module: crm_sale
-#: code:addons/crm_sale/models/crm_extended.py:143
+#: code:addons/crm_sale/models/crm_extended.py:130
 #, python-format
 msgid "Budget variants cannot be confirmed. Before confirm this variant"
-msgstr ""
+msgstr "Las variantes de presupuesto no se pueden confirmar. Antes de confirmar esta variante"
 
 #. module: crm_sale
 #: model:ir.model.fields,field_description:crm_sale.field_sale_order_child
 #: model:ir.model.fields,field_description:crm_sale.field_sale_order_flag_child
 msgid "Child"
-msgstr ""
+msgstr "Hijo"
 
 #. module: crm_sale
 #: model:ir.model.fields,field_description:crm_sale.field_sale_order_child_passed
 msgid "Child passed"
-msgstr ""
+msgstr "Hijo aprobado"
 
 #. module: crm_sale
 #: model:ir.ui.view,arch_db:crm_sale.sale_order_inherit_view
@@ -50,12 +50,22 @@ msgid "Create Variant"
 msgstr "Crear variante"
 
 #. module: crm_sale
+#: model:ir.model.fields,field_description:crm_sale.field_sale_order_measure_date
+msgid "Date Measure"
+msgstr "Fecha de medición"
+
+#. module: crm_sale
+#: model:ir.model.fields,field_description:crm_sale.field_sale_order_deploy_date
+msgid "Date of Production"
+msgstr "Fecha de producción"
+
+#. module: crm_sale
 #: model:ir.model,name:crm_sale.model_crm_lead
 msgid "Lead/Opportunity"
 msgstr "Iniciativa/Oportunidad"
 
 #. module: crm_sale
-#: code:addons/crm_sale/models/crm_extended.py:45
+#: code:addons/crm_sale/models/crm_extended.py:44
 #, python-format
 msgid "Order"
 msgstr "Orden"
@@ -68,12 +78,12 @@ msgstr "Padre"
 #. module: crm_sale
 #: model:ir.actions.act_window,help:crm_sale.action_sale_order_variant
 msgid "Pulse aquí para añadir un nuevo documento"
-msgstr ""
+msgstr "Pulse aquí para añadir un nuevo documento"
 
 #. module: crm_sale
 #: model:ir.model,name:crm_sale.model_sale_order
 msgid "Quotation"
-msgstr "Cotización"
+msgstr "Presupuesto"
 
 #. module: crm_sale
 #: model:ir.actions.act_window,name:crm_sale.action_sale_order_variant
@@ -83,21 +93,21 @@ msgstr "Variante de orden de venta"
 #. module: crm_sale
 #: model:ir.model,name:crm_sale.model_sale_order_line
 msgid "Sales Order Line"
-msgstr "Linea de orden de ventas"
+msgstr "Línea de pedido de ventas"
 
 #. module: crm_sale
-#: code:addons/crm_sale/models/crm_extended.py:57
+#: code:addons/crm_sale/models/crm_extended.py:58
 #, python-format
 msgid "The sale order variant is confirmed."
 msgstr "La variante de orden de venta esta confirmada."
 
 #. module: crm_sale
-#: code:addons/crm_sale/models/crm_extended.py:21
+#: code:addons/crm_sale/models/crm_extended.py:20
 #, python-format
-msgid "You need to create an opportunity first."
-msgstr "Necesita crear una oportunidad primero"
+msgid "You need to create an order sale first."
+msgstr "Usted necesita crear un presupuesto primero"
 
 #. module: crm_sale
 #: model:ir.model.fields,field_description:crm_sale.field_sale_order_line_id_inherit
 msgid "id_inherit"
-msgstr ""
+msgstr "id_inherit"
